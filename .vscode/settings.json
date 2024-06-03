@@ -1,0 +1,6 @@
+{
+    "terminal.integrated.env.linux": {
+
+    },
+    "go.testFlags": ["-v"]
+}
