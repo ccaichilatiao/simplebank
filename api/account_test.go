@@ -111,5 +111,4 @@ func TestCreateAccountAPI(t *testing.T) {
 			tc.checkResponse(t, recorder)
 		})
 	}
-
 }
