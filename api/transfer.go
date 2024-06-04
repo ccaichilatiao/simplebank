@@ -7,6 +7,7 @@ import (
 	"net/http"
 
 	db "github.com/ccaichilatiao/simplebank/db/sqlc"
+	"github.com/ccaichilatiao/simplebank/token"
 	"github.com/gin-gonic/gin"
 )
 
@@ -23,11 +24,20 @@ func (server *Server) createTransfer(ctx *gin.Context) {
 		ctx.JSON(http.StatusBadRequest, errorResponse(err))
 		return
 	}
-
-	if _, ok := server.validAccount(ctx, req.FromAccountID, req.Currency); !ok {
+	fromAccount, valid := server.validAccount(ctx, req.FromAccountID, req.Currency)
+	if !valid {
 		return
 	}
-	if _, ok := server.validAccount(ctx, req.ToAccountID, req.Currency); !ok {
+
+	authPayload := ctx.MustGet(authorizationPayloadKey).(*token.Payload)
+	if fromAccount.Owner != authPayload.Username {
+		err := errors.New("account does's belong to the authenticated user")
+		ctx.JSON(http.StatusUnauthorized, errorResponse(err))
+		return
+	}
+
+	_, valid = server.validAccount(ctx, req.ToAccountID, req.Currency)
+	if !valid {
 		return
 	}
 	arg := db.TransferTxParams{
@@ -38,7 +48,6 @@ func (server *Server) createTransfer(ctx *gin.Context) {
 
 	account, err := server.store.TransferTx(ctx, arg)
 	if err != nil {
-
 		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
 		return
 	}
