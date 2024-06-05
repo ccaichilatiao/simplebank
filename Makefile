@@ -33,4 +33,11 @@ mock:
 db_schema:
 	dbml2sql --postgres -o doc/schema.sql doc/db.dbml
 
-.PHONY: postgres removepostgres createdb dropdb migrateup migratedown sqlc test server db_schema
+proto:
+	rm -f pb/*.go
+	protoc --proto_path=proto \
+	--go_out=pb --go_opt=paths=source_relative \
+	--go-grpc_out=pb --go-grpc_opt=paths=source_relative \
+	proto/*.proto
+
+.PHONY: postgres removepostgres createdb dropdb migrateup migratedown sqlc test server db_schema proto
