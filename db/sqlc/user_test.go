@@ -71,6 +71,8 @@ func TestUpdateUserOnlyFullName(t *testing.T) {
 	require.Equal(t, newFullName, updatedUser.FullName)
 	require.Equal(t, oldUser.Email, updatedUser.Email)
 	require.Equal(t, oldUser.HashedPassword, updatedUser.HashedPassword)
+	require.Equal(t, oldUser.PasswordChangedAt, updatedUser.PasswordChangedAt)
+	require.Equal(t, oldUser.CreatedAt, updatedUser.CreatedAt)
 }
 
 func TestUpdateUserOnlyEmail(t *testing.T) {
@@ -90,6 +92,8 @@ func TestUpdateUserOnlyEmail(t *testing.T) {
 	require.Equal(t, newEmail, updatedUser.Email)
 	require.Equal(t, oldUser.FullName, updatedUser.FullName)
 	require.Equal(t, oldUser.HashedPassword, updatedUser.HashedPassword)
+	require.Equal(t, oldUser.PasswordChangedAt, updatedUser.PasswordChangedAt)
+	require.Equal(t, oldUser.CreatedAt, updatedUser.CreatedAt)
 }
 
 func TestUpdateUserOnlyPassword(t *testing.T) {
@@ -112,6 +116,8 @@ func TestUpdateUserOnlyPassword(t *testing.T) {
 	require.Equal(t, newHashedPassword, updatedUser.HashedPassword)
 	require.Equal(t, oldUser.FullName, updatedUser.FullName)
 	require.Equal(t, oldUser.Email, updatedUser.Email)
+	require.Equal(t, oldUser.PasswordChangedAt, updatedUser.PasswordChangedAt)
+	require.Equal(t, oldUser.CreatedAt, updatedUser.CreatedAt)
 }
 
 func TestUpdateUserAllFields(t *testing.T) {
@@ -119,6 +125,7 @@ func TestUpdateUserAllFields(t *testing.T) {
 
 	newFullName := util.RandomOwner()
 	newEmail := util.RandomEmail()
+	newPasswordChangedAt := time.Now()
 	newPassword := util.RandomString(6)
 	newHashedPassword, err := util.HashPassword(newPassword)
 	require.NoError(t, err)
@@ -137,13 +144,25 @@ func TestUpdateUserAllFields(t *testing.T) {
 			String: newHashedPassword,
 			Valid:  true,
 		},
+		PasswordChangedAt: sql.NullTime{
+			Time:  newPasswordChangedAt,
+			Valid: true,
+		},
 	})
 
 	require.NoError(t, err)
+
 	require.NotEqual(t, oldUser.HashedPassword, updatedUser.HashedPassword)
 	require.Equal(t, newHashedPassword, updatedUser.HashedPassword)
+
 	require.NotEqual(t, oldUser.Email, updatedUser.Email)
 	require.Equal(t, newEmail, updatedUser.Email)
+
 	require.NotEqual(t, oldUser.FullName, updatedUser.FullName)
 	require.Equal(t, newFullName, updatedUser.FullName)
+
+	require.NotEqual(t, oldUser.PasswordChangedAt, updatedUser.PasswordChangedAt)
+	require.Equal(t, newPasswordChangedAt.Format("2006-01-02 15:04:05"), updatedUser.PasswordChangedAt.Local().Format("2006-01-02 15:04:05"))
+
+	require.Equal(t, oldUser.CreatedAt, updatedUser.CreatedAt)
 }
