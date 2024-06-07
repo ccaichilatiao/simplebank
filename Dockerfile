@@ -1,11 +1,11 @@
 # Build stage
-FROM golang:1.20-alpine AS builder
+FROM golang:1.20-alpine3.16 AS builder
 WORKDIR /app
 COPY . .
 RUN go build -o main main.go
 
 # Run stage
-FROM alpine
+FROM alpine-alpine3.16
 WORKDIR /app
 COPY --from=builder /app/main .
 COPY app.env .
